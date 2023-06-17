@@ -47,4 +47,15 @@ router.get("/failure", (req, res) => {
   res.send("Login oauth failure");
 });
 
+//passport-jwt
+router.post("/jwt/login", userC.jwtLogin);
+
+router.get(
+  "/jwt/profile",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    res.status(201).send(req.user);
+  }
+);
+
 module.exports = router;

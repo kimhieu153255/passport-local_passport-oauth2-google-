@@ -30,6 +30,9 @@ app.use(passport.session());
 //conf googleOauth
 require("./conf/googleOauth")(passport);
 
+//conf passport-jwt
+require("./conf/passport-jwt")(passport);
+
 const middleware = (req, res, next) => {
   if (req.isAuthenticated()) {
     console.log("user", req.user);

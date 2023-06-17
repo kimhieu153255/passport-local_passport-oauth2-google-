@@ -1,5 +1,6 @@
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 //register user
 exports.register = async (req, res, next) => {
@@ -58,5 +59,36 @@ exports.login = async (req, res, next) => {
     res.status(400).send("Invalid credentials");
   } catch (err) {
     next(err);
+  }
+};
+
+///////////////////////login with passport-jwt///////////////////////
+exports.jwtLogin = async (req, res, next) => {
+  try {
+    const { username, password } = req.body;
+    User.findOne({ username }).then((user) => {
+      if (!user) {
+        return res.status(400).send("User not found");
+      }
+      bcrypt.compare(password, user.password).then((isMatch) => {
+        if (isMatch) {
+          const payload = {
+            id: user._id,
+            username: user.username,
+          };
+          const token = jwt.sign(payload, process.env.JWT_SECRET, {
+            //authentication token expires in 20s
+            expiresIn: 60,
+          });
+          //them token vao header
+          res.setHeader("Authorization", "Bearer " + token);
+          res.status(200).send({ token });
+        } else {
+          res.status(400).send("Password incorrect");
+        }
+      });
+    });
+  } catch (error) {
+    next(error);
   }
 };
